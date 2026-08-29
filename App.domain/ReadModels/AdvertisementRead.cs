@@ -1,0 +1,10 @@
+namespace App.domain.ReadModels;
+
+public class AdvertisementRead
+{
+    public string Advertisement_id { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public DateTime PublishedAt { get; set; }
+    public bool IsActive { get; set; }
+}

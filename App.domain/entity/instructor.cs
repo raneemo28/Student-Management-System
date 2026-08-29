@@ -1,0 +1,9 @@
+namespace App.domain.entity;
+
+public class Instructor
+{
+    public string Instructor_id { get; set; } = string.Empty;
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public string? User_id { get; set; }
+}
