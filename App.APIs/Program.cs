@@ -8,10 +8,12 @@ using App.infra.Repositories;
 using App.infra.Services;
 using App.infra.Strategies;
 using App.infra.FileStorage;
+using App.infra.Caching;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.ResponseCaching;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -19,7 +21,30 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Register Business Database Context (Write)
+builder.Services.AddMemoryCache();
+builder.Services.AddResponseCaching(options =>
+{
+    options.SizeLimit = 100 * 1024 * 1024;
+});
+
+if (builder.Configuration.GetValue<bool>("Caching:UseDistributedCache"))
+{
+    var redisConfig = builder.Configuration.GetSection("Redis");
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = redisConfig["ConnectionString"] ?? "localhost:6379";
+        options.InstanceName = redisConfig["InstanceName"] ?? "studentmgmt:";
+    });
+    builder.Services.AddSingleton<ICacheInvalidationService, RedisCacheInvalidationService>();
+}
+else
+{
+    builder.Services.AddSingleton<ICacheInvalidationService, CacheInvalidationService>();
+}
+
+builder.Services.AddScoped<ICacheService, CacheService>();
+
+    // Register Business Database Context (Write)
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("BusinessDbConnection")));
 
@@ -144,6 +169,9 @@ builder.Services.AddScoped<IContentTypeHandler, PdfContentTypeHandler>();
 builder.Services.AddScoped<IContentTypeHandler, ImageContentTypeHandler>();
 builder.Services.AddScoped<IContentTypeHandler, VideoContentTypeHandler>();
 
+// Register Log Publisher
+builder.Services.AddSingleton<ILogPublisher, RabbitMqLogPublisher>();
+
 // Register FluentValidation Validators
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterUserDtoValidator>();
 
@@ -154,6 +182,7 @@ var app = builder.Build();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseResponseCaching();
 app.MapControllers();
 
 app.Run();

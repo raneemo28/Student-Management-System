@@ -18,6 +18,7 @@ public class CoursesController : ControllerBase
     }
 
     [HttpGet]
+    [ResponseCache(Duration = 20, VaryByQueryKeys = new string[0])]
     public async Task<IActionResult> GetAll()
     {
         var courses = await _mediator.Send(new GetAllCoursesQuery());
@@ -25,6 +26,7 @@ public class CoursesController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [ResponseCache(Duration = 60, VaryByQueryKeys = new[] { "id" })]
     public async Task<IActionResult> GetById(string id)
     {
         var course = await _mediator.Send(new GetCourseByIdQuery(id));

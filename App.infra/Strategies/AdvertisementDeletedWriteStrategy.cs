@@ -2,6 +2,7 @@ using App.Application.Common.Events;
 using App.domain.ReadModels;
 using App.domain.entity;
 using App.infra.Persistence;
+using App.infra.Caching;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
@@ -10,10 +11,12 @@ namespace App.infra.Strategies;
 public class AdvertisementDeletedWriteStrategy : IDomainEventWriteStrategy
 {
     private readonly AppReadDbContext _readContext;
+    private readonly ICacheInvalidationService _cacheInvalidation;
 
-    public AdvertisementDeletedWriteStrategy(AppReadDbContext readContext)
+    public AdvertisementDeletedWriteStrategy(AppReadDbContext readContext, ICacheInvalidationService cacheInvalidation)
     {
         _readContext = readContext;
+        _cacheInvalidation = cacheInvalidation;
     }
 
     public async Task ProcessAsync(DomainEvent domainEvent)
@@ -26,6 +29,7 @@ public class AdvertisementDeletedWriteStrategy : IDomainEventWriteStrategy
 
         _readContext.AdvertisementsRead.Remove(advertisementRead);
         await _readContext.SaveChangesAsync();
+        await _cacheInvalidation.InvalidateByEntityAsync("AdvertisementRead", data.Advertisement_id);
     }
 
     private record AdvertisementDeletedData(string Advertisement_id);

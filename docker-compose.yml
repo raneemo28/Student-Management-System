@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    environment:
+      - ConnectionStrings__BusinessDbConnection=Server=host.docker.internal;Database=StudentDomainDb;TrustServerCertificate=True
+      - ConnectionStrings__IdentityDbConnection=Server=host.docker.internal;Database=StudentAuthDb;TrustServerCertificate=True
+      - ConnectionStrings__ReadDbConnection=Server=host.docker.internal;Database=StudentReadDb;TrustServerCertificate=True
+      - Caching__UseDistributedCache=true
+      - Redis__ConnectionString=redis:6379
+    depends_on:
+      - redis
+      - sqlserver
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong@Passw0rd
+    volumes:
+      - mssql-data:/var/opt/mssql
+
+volumes:
+  redis-data:
+  mssql-data:

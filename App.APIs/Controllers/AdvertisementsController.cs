@@ -18,6 +18,7 @@ public class AdvertisementsController : ControllerBase
     }
 
     [HttpGet]
+    [ResponseCache(Duration = 300)]
     public async Task<IActionResult> GetAll()
     {
         var advertisements = await _mediator.Send(new GetAllAdvertisementsQuery());
@@ -25,6 +26,7 @@ public class AdvertisementsController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [ResponseCache(Duration = 60)]
     public async Task<IActionResult> GetById(string id)
     {
         var advertisement = await _mediator.Send(new GetAdvertisementByIdQuery(id));

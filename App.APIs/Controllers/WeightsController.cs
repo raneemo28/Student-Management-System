@@ -17,6 +17,7 @@ public class WeightsController : ControllerBase
     }
 
     [HttpGet("course/{courseId}")]
+    [ResponseCache(Duration = 30, VaryByQueryKeys = new[] { "courseId" })]
     public async Task<IActionResult> GetWeights(string courseId)
     {
         var courseResult = await _courseService.GetByIdAsync(courseId);

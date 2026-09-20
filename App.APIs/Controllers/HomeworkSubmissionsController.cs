@@ -18,6 +18,7 @@ public class HomeworkSubmissionsController : ControllerBase
     }
 
     [HttpGet("homework/{homeworkId}")]
+    [ResponseCache(Duration = 10, VaryByQueryKeys = new[] { "homeworkId" })]
     public async Task<IActionResult> GetByHomework(string homeworkId)
     {
         var submissions = await _mediator.Send(new GetSubmissionsByHomeworkQuery(homeworkId));
@@ -25,6 +26,7 @@ public class HomeworkSubmissionsController : ControllerBase
     }
 
     [HttpGet("student/{studentId}/homework/{homeworkId}")]
+    [ResponseCache(Duration = 10, VaryByQueryKeys = new[] { "studentId", "homeworkId" })]
     public async Task<IActionResult> GetByStudent(string studentId, string homeworkId)
     {
         var submission = await _mediator.Send(new GetSubmissionByStudentQuery(studentId, homeworkId));
