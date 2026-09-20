@@ -2,6 +2,7 @@ using App.Application.Common.Events;
 using App.domain.ReadModels;
 using App.domain.entity;
 using App.infra.Persistence;
+using App.infra.Caching;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
@@ -10,10 +11,12 @@ namespace App.infra.Strategies;
 public class CourseCreatedWriteStrategy : IDomainEventWriteStrategy
 {
     private readonly AppReadDbContext _readContext;
+    private readonly ICacheInvalidationService _cacheInvalidation;
 
-    public CourseCreatedWriteStrategy(AppReadDbContext readContext)
+    public CourseCreatedWriteStrategy(AppReadDbContext readContext, ICacheInvalidationService cacheInvalidation)
     {
         _readContext = readContext;
+        _cacheInvalidation = cacheInvalidation;
     }
 
     public async Task ProcessAsync(DomainEvent domainEvent)
@@ -30,6 +33,7 @@ public class CourseCreatedWriteStrategy : IDomainEventWriteStrategy
 
         _readContext.CoursesRead.Add(courseRead);
         await _readContext.SaveChangesAsync();
+        await _cacheInvalidation.InvalidateByEntityAsync("CourseRead", data.Course_id);
     }
 
     private record CourseCreatedData(string Course_id, string Course_name, string? Instructor_id);

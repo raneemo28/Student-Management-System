@@ -18,6 +18,7 @@ public class EnrollmentsController : ControllerBase
     }
 
     [HttpGet]
+    [ResponseCache(Duration = 15, VaryByQueryKeys = new string[0])]
     public async Task<IActionResult> GetAll()
     {
         var enrollments = await _mediator.Send(new GetAllEnrollmentsQuery());
@@ -25,6 +26,7 @@ public class EnrollmentsController : ControllerBase
     }
 
     [HttpGet("{studentId}/{courseId}")]
+    [ResponseCache(Duration = 15, VaryByQueryKeys = new[] { "studentId", "courseId" })]
     public async Task<IActionResult> GetById(string studentId, string courseId)
     {
         var enrollment = await _mediator.Send(new GetEnrollmentByIdQuery(studentId, courseId));

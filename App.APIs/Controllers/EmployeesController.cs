@@ -18,6 +18,7 @@ public class EmployeesController : ControllerBase
     }
 
     [HttpGet]
+    [ResponseCache(Duration = 20, VaryByQueryKeys = new string[0])]
     public async Task<IActionResult> GetAll()
     {
         var employees = await _mediator.Send(new GetAllEmployeesQuery());
@@ -25,6 +26,7 @@ public class EmployeesController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [ResponseCache(Duration = 30, VaryByQueryKeys = new[] { "id" })]
     public async Task<IActionResult> GetById(string id)
     {
         var employee = await _mediator.Send(new GetEmployeeByIdQuery(id));

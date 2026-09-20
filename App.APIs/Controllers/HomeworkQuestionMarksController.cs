@@ -18,6 +18,7 @@ public class HomeworkQuestionMarksController : ControllerBase
     }
 
     [HttpGet("submission/{submissionId}")]
+    [ResponseCache(Duration = 5, VaryByQueryKeys = new[] { "submissionId" })]
     public async Task<IActionResult> GetBySubmission(string submissionId)
     {
         var questionMarks = await _mediator.Send(new GetQuestionMarksBySubmissionQuery(submissionId));

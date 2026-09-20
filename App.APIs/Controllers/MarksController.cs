@@ -29,6 +29,7 @@ public class MarksController : ControllerBase
     }
 
     [HttpGet("enrollment/{studentId}/{courseId}")]
+    [ResponseCache(Duration = 10, VaryByQueryKeys = new[] { "studentId", "courseId" })]
     public async Task<IActionResult> GetMarks(string studentId, string courseId)
     {
         var result = await _courseStudentService.GetMarksAsync(studentId, courseId);

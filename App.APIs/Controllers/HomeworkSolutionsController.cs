@@ -18,6 +18,7 @@ public class HomeworkSolutionsController : ControllerBase
     }
 
     [HttpGet("homework/{homeworkId}")]
+    [ResponseCache(Duration = 15, VaryByQueryKeys = new[] { "homeworkId" })]
     public async Task<IActionResult> GetByHomework(string homeworkId)
     {
         var solutions = await _mediator.Send(new GetSolutionsByHomeworkQuery(homeworkId));
